@@ -1,23 +1,41 @@
-// POST /api/analyze-lead
-// Skeleton stage: returns a fixed analysis so the UI can be wired end to end.
+import { generateJson, LlmError } from './_lib/llm.js'
+import { SYSTEM_INSTRUCTION, RESPONSE_SCHEMA, buildUserPrompt } from './_lib/prompt.js'
+import { validateInput, parseAnalysis } from './_lib/validate.js'
+import { createRateLimiter, clientIp } from './_lib/rateLimit.js'
+
+const isAllowed = createRateLimiter({ limit: 10, windowMs: 60_000 })
+const MAX_ATTEMPTS = 2
+
+// POST /api/analyze-lead  { message } -> lead analysis (see docs/SPEC.md §6)
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const message = typeof req.body?.message === 'string' ? req.body.message.trim() : ''
-  if (!message) {
-    return res.status(400).json({ error: 'חסרה פנייה לניתוח' })
+  if (!isAllowed(clientIp(req))) {
+    return res.status(429).json({ error: 'יותר מדי בקשות, נסו שוב בעוד דקה' })
   }
 
-  return res.status(200).json({
-    intent: 'בקשת שירות דחופה – תיקון מזגן',
-    category: 'service',
-    urgency: 5,
-    urgencyReason: 'תקלה פעילה, מבקש טיפול היום',
-    summary: 'דני מבקש טכנאי היום לנזילה במזגן שנמשכת יומיים',
-    extracted: { name: 'דני', phone: '050-1234567', product: 'מזגן', budget: null, timeframe: 'היום' },
-    suggestedReply: 'היי דני, קיבלנו את הפנייה ואנחנו על זה. טכנאי יחזור אליך בשעה הקרובה לתיאום הגעה עוד היום.',
-    nextAction: 'להתקשר ללקוח בשעה הקרובה ולתאם טכנאי',
-  })
+  const input = validateInput(req.body)
+  if (!input.ok) return res.status(400).json({ error: input.error })
+
+  let lastError
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const text = await generateJson({
+        system: SYSTEM_INSTRUCTION,
+        user: buildUserPrompt(input.message),
+        schema: RESPONSE_SCHEMA,
+      })
+      return res.status(200).json(parseAnalysis(text))
+    } catch (err) {
+      lastError = err
+      // Only a malformed answer is worth asking for again; llm.js already
+      // handled provider failures by falling back to another model.
+      if (err instanceof LlmError) break
+    }
+  }
+
+  console.error('analyze-lead failed:', lastError)
+  return res.status(502).json({ error: 'הניתוח נכשל כרגע, נסו שוב בעוד רגע' })
 }
