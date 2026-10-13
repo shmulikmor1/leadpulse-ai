@@ -6,3 +6,6 @@ dist
 .vercel
 *.log
 .DS_Store
+
+# local screen captures
+screencapture-*.pdf
