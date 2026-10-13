@@ -1,0 +1,608 @@
+{
+  "name": "LeadPulse AI",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": 0,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "setupValidation": {
+          "version": 1,
+          "configuration": "4842bca942d7b9f9",
+          "result": {
+            "valid": true,
+            "fields": []
+          }
+        },
+        "restore": {
+          "parameters": {
+            "hook": {
+              "label": "LeadPulse",
+              "data": {
+                "editable": "true"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook:gateway-webhook",
+            "label": "Webhook",
+            "required": true
+          },
+          {
+            "name": "maxResults",
+            "type": "number",
+            "label": "Maximum number of results"
+          }
+        ],
+        "interface": [
+          {
+            "name": "intent",
+            "type": "text"
+          },
+          {
+            "name": "category",
+            "type": "text"
+          },
+          {
+            "name": "urgency",
+            "type": "number"
+          },
+          {
+            "name": "urgencyReason",
+            "type": "text"
+          },
+          {
+            "name": "summary",
+            "type": "text"
+          },
+          {
+            "name": "extracted",
+            "type": "collection",
+            "spec": [
+              {
+                "name": "name",
+                "type": "text"
+              },
+              {
+                "name": "phone",
+                "type": "text"
+              },
+              {
+                "name": "product",
+                "type": "text"
+              },
+              {
+                "name": "budget",
+                "type": "text"
+              },
+              {
+                "name": "timeframe",
+                "type": "text"
+              }
+            ]
+          },
+          {
+            "name": "suggestedReply",
+            "type": "text"
+          },
+          {
+            "name": "nextAction",
+            "type": "text"
+          },
+          {
+            "name": "message",
+            "type": "text"
+          },
+          {
+            "name": "receivedAt",
+            "type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "module": "google-sheets:addRow",
+      "version": 2,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "mapper": {
+        "mode": "select",
+        "insertUnformatted": false,
+        "valueInputOption": "USER_ENTERED",
+        "insertDataOption": "INSERT_ROWS",
+        "from": "drive",
+        "spreadsheetId": "/YOUR_SPREADSHEET_ID",
+        "sheetId": "גיליון1",
+        "includesHeaders": true,
+        "useColumnHeaders": false,
+        "values": {
+          "0": "{{1.receivedAt}}",
+          "1": "{{1.urgency}}",
+          "2": "{{1.category}}",
+          "3": "{{1.summary}}",
+          "4": "{{1.extracted.name}}",
+          "5": "{{1.extracted.phone}}",
+          "6": "{{1.message}}"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        },
+        "setupValidation": {
+          "version": 1,
+          "configuration": "4a1366ed894312e",
+          "result": {
+            "valid": true,
+            "fields": []
+          }
+        },
+        "restore": {
+          "parameters": {
+            "__IMTCONN__": {
+              "label": "Google connection",
+              "data": {
+                "scoped": "true",
+                "connection": "google"
+              }
+            }
+          },
+          "expect": {
+            "mode": {
+              "label": "Search by path"
+            },
+            "insertUnformatted": {
+              "mode": "chose"
+            },
+            "valueInputOption": {
+              "mode": "chose",
+              "label": "User entered"
+            },
+            "insertDataOption": {
+              "mode": "chose",
+              "label": "Insert rows"
+            },
+            "from": {
+              "label": "My Drive"
+            },
+            "spreadsheetId": {
+              "path": [
+                "LeadPulse Leads"
+              ]
+            },
+            "sheetId": {
+              "label": "גיליון1"
+            },
+            "includesHeaders": {
+              "label": "Yes"
+            },
+            "useColumnHeaders": {
+              "label": "No"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:google",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "mode",
+            "type": "select",
+            "label": "Search Method",
+            "required": true,
+            "validate": {
+              "enum": [
+                "select",
+                "fromAll",
+                "map"
+              ]
+            }
+          },
+          {
+            "name": "insertUnformatted",
+            "type": "boolean",
+            "label": "Unformatted",
+            "required": true
+          },
+          {
+            "name": "valueInputOption",
+            "type": "select",
+            "label": "Value input option",
+            "required": true,
+            "validate": {
+              "enum": [
+                "USER_ENTERED",
+                "RAW"
+              ]
+            }
+          },
+          {
+            "name": "insertDataOption",
+            "type": "select",
+            "label": "Insert data option",
+            "validate": {
+              "enum": [
+                "INSERT_ROWS",
+                "OVERWRITE"
+              ]
+            }
+          },
+          {
+            "name": "from",
+            "type": "select",
+            "label": "Drive",
+            "required": true,
+            "validate": {
+              "enum": [
+                "drive",
+                "share",
+                "team"
+              ]
+            }
+          },
+          {
+            "name": "spreadsheetId",
+            "type": "file",
+            "label": "Spreadsheet Name",
+            "required": true
+          },
+          {
+            "name": "sheetId",
+            "type": "select",
+            "label": "Sheet Name",
+            "required": true
+          },
+          {
+            "name": "includesHeaders",
+            "type": "select",
+            "label": "Table contains headers",
+            "required": true,
+            "validate": {
+              "enum": [
+                true,
+                false
+              ]
+            }
+          },
+          {
+            "name": "useColumnHeaders",
+            "type": "select",
+            "label": "Use column headers as IDs of the columns",
+            "required": true,
+            "validate": {
+              "enum": [
+                true,
+                false
+              ]
+            }
+          },
+          {
+            "name": "values",
+            "type": "collection",
+            "label": "Values in columns",
+            "metadata": [
+              [
+                [
+                  "זמן",
+                  "דחיפות",
+                  "קטגוריה",
+                  "סיכום",
+                  "שם",
+                  "טלפון",
+                  "פנייה"
+                ]
+              ]
+            ],
+            "spec": [
+              {
+                "name": "0",
+                "type": "text",
+                "label": "זמן (A)"
+              },
+              {
+                "name": "1",
+                "type": "text",
+                "label": "דחיפות (B)"
+              },
+              {
+                "name": "2",
+                "type": "text",
+                "label": "קטגוריה (C)"
+              },
+              {
+                "name": "3",
+                "type": "text",
+                "label": "סיכום (D)"
+              },
+              {
+                "name": "4",
+                "type": "text",
+                "label": "שם (E)"
+              },
+              {
+                "name": "5",
+                "type": "text",
+                "label": "טלפון (F)"
+              },
+              {
+                "name": "6",
+                "type": "text",
+                "label": "פנייה (G)"
+              },
+              {
+                "name": "7",
+                "type": "text",
+                "label": "(H)"
+              },
+              {
+                "name": "8",
+                "type": "text",
+                "label": "(I)"
+              },
+              {
+                "name": "9",
+                "type": "text",
+                "label": "(J)"
+              },
+              {
+                "name": "10",
+                "type": "text",
+                "label": "(K)"
+              },
+              {
+                "name": "11",
+                "type": "text",
+                "label": "(L)"
+              },
+              {
+                "name": "12",
+                "type": "text",
+                "label": "(M)"
+              },
+              {
+                "name": "13",
+                "type": "text",
+                "label": "(N)"
+              },
+              {
+                "name": "14",
+                "type": "text",
+                "label": "(O)"
+              },
+              {
+                "name": "15",
+                "type": "text",
+                "label": "(P)"
+              },
+              {
+                "name": "16",
+                "type": "text",
+                "label": "(Q)"
+              },
+              {
+                "name": "17",
+                "type": "text",
+                "label": "(R)"
+              },
+              {
+                "name": "18",
+                "type": "text",
+                "label": "(S)"
+              },
+              {
+                "name": "19",
+                "type": "text",
+                "label": "(T)"
+              },
+              {
+                "name": "20",
+                "type": "text",
+                "label": "(U)"
+              },
+              {
+                "name": "21",
+                "type": "text",
+                "label": "(V)"
+              },
+              {
+                "name": "22",
+                "type": "text",
+                "label": "(W)"
+              },
+              {
+                "name": "23",
+                "type": "text",
+                "label": "(X)"
+              },
+              {
+                "name": "24",
+                "type": "text",
+                "label": "(Y)"
+              },
+              {
+                "name": "25",
+                "type": "text",
+                "label": "(Z)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "module": "telegram:SendReplyMessage",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": 0
+      },
+      "filter": {
+        "name": "דחוף",
+        "conditions": [
+          [
+            {
+              "a": "{{1.urgency}}",
+              "o": "number:greaterorequal",
+              "b": "4"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "🔥 ליד דחוף (דחיפות) {{1.urgency}}\r\n\r\n{{1.summary}}\r\nהצעד הבא: {{1.nextAction}}\r\n\r\nתשובה מוצעת:\n{{1.suggestedReply}}\r\n\r\n\r\nטלפון: {{1.extracted.phone}}\r\n",
+        "messageThreadId": "",
+        "parseMode": "",
+        "replyToMessageId": "",
+        "replyMarkupAssembleType": "reply_markup_enter",
+        "replyMarkup": ""
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        },
+        "setupValidation": {
+          "version": 1,
+          "configuration": "7761690b16324e4",
+          "result": {
+            "valid": true,
+            "fields": []
+          }
+        },
+        "restore": {
+          "parameters": {
+            "__IMTCONN__": {
+              "label": "Telegram Bot connection",
+              "data": {
+                "scoped": "true",
+                "connection": "telegram"
+              }
+            }
+          },
+          "expect": {
+            "parseMode": {
+              "label": "Empty"
+            },
+            "disableNotification": {
+              "mode": "chose"
+            },
+            "replyMarkupAssembleType": {
+              "label": "Enter the Reply Markup"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "__IMTCONN__",
+            "type": "account:telegram",
+            "label": "Connection",
+            "required": true
+          }
+        ],
+        "expect": [
+          {
+            "name": "chatId",
+            "type": "text",
+            "label": "Chat ID",
+            "required": true
+          },
+          {
+            "name": "text",
+            "type": "text",
+            "label": "Text",
+            "required": true
+          },
+          {
+            "name": "messageThreadId",
+            "type": "number",
+            "label": "Message Thread ID"
+          },
+          {
+            "name": "parseMode",
+            "type": "select",
+            "label": "Parse Mode",
+            "validate": {
+              "enum": [
+                "Markdown",
+                "HTML"
+              ]
+            }
+          },
+          {
+            "name": "disableNotification",
+            "type": "boolean",
+            "label": "Disable Notifications"
+          },
+          {
+            "name": "disableWebPagePreview",
+            "type": "boolean",
+            "label": "Disable Link Previews"
+          },
+          {
+            "name": "replyToMessageId",
+            "type": "number",
+            "label": "Original Message ID"
+          },
+          {
+            "name": "replyMarkupAssembleType",
+            "type": "select",
+            "label": "Enter/Assemble the Reply Markup Field",
+            "validate": {
+              "enum": [
+                "reply_markup_enter",
+                "reply_markup_assemble"
+              ]
+            }
+          },
+          {
+            "name": "replyMarkup",
+            "type": "text",
+            "label": "Reply Markup"
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "eu1.make.com",
+    "notes": []
+  }
+}
