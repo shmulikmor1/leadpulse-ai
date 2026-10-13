@@ -71,8 +71,8 @@ api/
     webhook.js           שליחה ל-Make
 src/
   App.jsx
-  components/            LeadInput, ResultCard, UrgencyMeter, HistoryList
-  data/examples.js       פניות לדוגמה
+  components/            LeadInput, ResultCard, UrgencyMeter, HistoryList, ResultStates
+  data/                  פניות לדוגמה ותוויות תצוגה
 automation/
   make-blueprint.json
 docs/
@@ -157,11 +157,11 @@ Make הוא שירות ענן, ולכן האוטומציה פועלת גם בד�
 
 ### שלב 3 – ממשק
 
-- [ ] 3.1 אזור ההזנה והדוגמאות
-- [ ] 3.2 כרטיס התוצאה ומד הדחיפות
-- [ ] 3.3 היסטוריית הסשן
-- [ ] 3.4 מצבי טעינה, שגיאה ומצב ריק
-- [ ] 3.5 ליטוש עיצובי ומובייל
+- [x] 3.1 אזור ההזנה והדוגמאות
+- [x] 3.2 כרטיס התוצאה ומד הדחיפות
+- [x] 3.3 היסטוריית הסשן
+- [x] 3.4 מצבי טעינה, שגיאה ומצב ריק
+- [x] 3.5 ליטוש עיצובי ומובייל
 
 ### שלב 4 – אוטומציה
 

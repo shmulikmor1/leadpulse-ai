@@ -1,54 +1,94 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { analyzeLead } from './api.js'
+import LeadInput from './components/LeadInput.jsx'
+import ResultCard from './components/ResultCard.jsx'
+import HistoryList from './components/HistoryList.jsx'
+import { EmptyState, ErrorState, LoadingState, PulseIcon } from './components/ResultStates.jsx'
 
 export default function App() {
   const [message, setMessage] = useState('')
-  const [result, setResult] = useState(null)
+  const [history, setHistory] = useState([])
+  const [activeId, setActiveId] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const resultRef = useRef(null)
 
-  async function handleSubmit(e) {
-    e.preventDefault()
+  const active = history.find((item) => item.id === activeId)
+
+  function showResult() {
+    // On narrow screens the result sits below the form.
+    if (window.matchMedia('(max-width: 1023px)').matches) {
+      resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  async function handleSubmit() {
+    const text = message.trim()
     setError('')
     setLoading(true)
+    showResult()
     try {
-      setResult(await analyzeLead(message))
+      const result = await analyzeLead(text)
+      const id = Date.now()
+      setHistory((items) => [...items, { id, message: text, result }])
+      setActiveId(id)
     } catch (err) {
-      setResult(null)
       setError(err.message)
     } finally {
       setLoading(false)
     }
   }
 
+  function handleSelect(id) {
+    setError('')
+    setActiveId(id)
+    showResult()
+  }
+
   return (
-    <main className="mx-auto min-h-screen max-w-2xl px-4 py-10 font-sans text-slate-900">
-      <h1 className="text-3xl font-bold">LeadPulse AI</h1>
-      <p className="mt-1 text-slate-600">ניתוח פניות לקוחות בשניות</p>
+    <div className="min-h-screen bg-stone-100 font-sans text-stone-900">
+      <div className="mx-auto max-w-6xl px-4 pt-6 pb-12 sm:px-6 sm:pt-10">
+        <header className="max-w-2xl">
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-stone-900 text-teal-300">
+              <PulseIcon className="h-5 w-5" />
+            </span>
+            <span dir="ltr" className="text-lg font-bold tracking-tight">
+              LeadPulse AI
+            </span>
+            <span className="rounded-full bg-stone-200 px-2 py-0.5 text-xs font-medium text-stone-600">דמו</span>
+          </div>
+          <h1 className="mt-6 text-3xl leading-tight font-bold tracking-tight sm:text-4xl">איזו פנייה לא יכולה לחכות?</h1>
+          <p className="mt-3 text-base leading-relaxed text-stone-600 sm:text-lg">
+            סוכן AI שקורא כל פנייה שנכנסת לעסק, מדרג כמה היא דחופה ומכין תשובה ללקוח, כדי שהלידים החמים יקבלו מענה ראשונים.
+          </p>
+        </header>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-3">
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          rows={5}
-          placeholder="הדביקו כאן פנייה של לקוח..."
-          className="w-full rounded-lg border border-slate-300 p-3"
-        />
-        <button
-          type="submit"
-          disabled={loading || !message.trim()}
-          className="rounded-lg bg-indigo-600 px-5 py-2 font-medium text-white disabled:opacity-50"
-        >
-          {loading ? 'מנתח...' : 'נתח'}
-        </button>
-      </form>
+        {/* DOM order is form, result, history so the result follows the form on mobile. */}
+        <main className="mt-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:grid-rows-[auto_1fr]">
+          <LeadInput value={message} onChange={setMessage} onSubmit={handleSubmit} loading={loading} />
 
-      {error && <p className="mt-4 text-red-600">{error}</p>}
-      {result && (
-        <pre dir="ltr" className="mt-6 overflow-x-auto rounded-lg bg-slate-100 p-4 text-sm">
-          {JSON.stringify(result, null, 2)}
-        </pre>
-      )}
-    </main>
+          <div ref={resultRef} className="scroll-mt-4 lg:col-start-2 lg:row-span-2 lg:row-start-1" aria-live="polite">
+            {loading ? (
+              <LoadingState />
+            ) : error ? (
+              <ErrorState message={error} onRetry={handleSubmit} />
+            ) : active ? (
+              <ResultCard message={active.message} result={active.result} />
+            ) : (
+              <EmptyState />
+            )}
+          </div>
+
+          <div className="lg:col-start-1 lg:row-start-2">
+            <HistoryList items={history} activeId={activeId} onSelect={handleSelect} />
+          </div>
+        </main>
+
+        <footer className="mt-10 text-center text-xs text-stone-500">
+          הדגמה בלבד. הפניות נשלחות לניתוח ואינן נשמרות.
+        </footer>
+      </div>
+    </div>
   )
 }
