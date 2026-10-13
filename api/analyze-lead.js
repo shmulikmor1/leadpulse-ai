@@ -7,7 +7,7 @@ import { notifyAutomation } from './_lib/webhook.js'
 const isAllowed = createRateLimiter({ limit: 10, windowMs: 60_000 })
 const MAX_ATTEMPTS = 2
 
-// POST /api/analyze-lead  { message } -> lead analysis (see docs/SPEC.md §6)
+// POST /api/analyze-lead  { message } -> lead analysis (see public/spec.html, "חוזה ה-API")
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
