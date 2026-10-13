@@ -89,6 +89,10 @@ export default function App() {
           הדגמה בלבד. הפניות נשלחות לניתוח ואינן נשמרות. ·{' '}
           <a href="/spec.html" className="font-medium text-teal-700 underline-offset-2 hover:underline">
             מסמך האפיון
+          </a>{' '}
+          ·{' '}
+          <a href="https://github.com/shmulikmor1/leadpulse-ai" className="font-medium text-teal-700 underline-offset-2 hover:underline">
+            הקוד ב-GitHub
           </a>
         </footer>
       </div>
