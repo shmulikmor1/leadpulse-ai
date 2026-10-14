@@ -86,7 +86,7 @@ export default function App() {
         </main>
 
         <footer className="mt-10 text-center text-xs text-stone-500">
-          הדגמה בלבד. הפניות נשלחות לניתוח ואינן נשמרות. ·{' '}
+          הדגמה בלבד. פניות שנשלחות כאן נרשמות בגיליון ההדגמה, ופניות דחופות שולחות התראה למפתח. ·{' '}
           <a href="/spec.html" className="font-medium text-teal-700 underline-offset-2 hover:underline">
             מסמך האפיון
           </a>{' '}
